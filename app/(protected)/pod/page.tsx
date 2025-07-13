@@ -14,6 +14,7 @@ import JoinPodModal from "../../components/JoinPodModal";
 import PaymentModal from "../../components/PaymentModal";
 import EmptyState from "../../components/EmptyState";
 import { useWebSocket } from "../../hooks/useWebSocket";
+import { getRandomizedProducts, ProductItem } from "../../utils/productLoader";
 
 interface PodMember {
   id: string;
@@ -46,16 +47,8 @@ interface Pod {
   ownerId: string;
 }
 
-const PRODUCTS = [
-  { id: "rice", name: "Basmati Rice (5kg)", price: 320 },
-  { id: "milk", name: "Cow Milk (1L)", price: 45 },
-  { id: "eggs", name: "Free‑Range Eggs (12 pcs)", price: 120 },
-  { id: "soap", name: "Herbal Bath Soap", price: 60 },
-  { id: "bread", name: "Whole Wheat Bread", price: 40 },
-  { id: "tomatoes", name: "Fresh Tomatoes (1kg)", price: 80 },
-  { id: "onions", name: "Onions (2kg)", price: 60 },
-  { id: "potatoes", name: "Potatoes (3kg)", price: 90 },
-];
+// Get randomized products from the JSON file
+const PRODUCTS: ProductItem[] = getRandomizedProducts();
 
 export default function ShoppingPodPage() {
   const { user, isLoaded } = useUser();
@@ -164,9 +157,23 @@ export default function ShoppingPodPage() {
       case "item_added":
         if (currentPod && message.podId === currentPod.id) {
           console.log("WebSocket: Adding item with ID:", message.item.id);
+          const existingItemIndex = currentPod.items.findIndex(
+            (item) => item.productId === message.item.productId
+          );
+
+          let updatedItems;
+          if (existingItemIndex !== -1) {
+            // Update existing item
+            updatedItems = [...currentPod.items];
+            updatedItems[existingItemIndex] = message.item;
+          } else {
+            // Add new item
+            updatedItems = [...currentPod.items, message.item];
+          }
+
           const updatedPod = {
             ...currentPod,
-            items: [...currentPod.items, message.item],
+            items: updatedItems,
           };
           setCurrentPod(updatedPod);
           setPods((prev) =>
@@ -580,17 +587,7 @@ export default function ShoppingPodPage() {
       <div className="lg:pl-64">
         <div className="relative">
           {/* Pulsing background blobs */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute top-20 left-8 w-32 h-32 bg-[#51c995] rounded-full opacity-10 animate-pulse"></div>
-            <div
-              className="absolute bottom-32 right-12 w-24 h-24 bg-[#04b7cf] rounded-full opacity-10 animate-pulse"
-              style={{ animationDelay: "1s" }}
-            ></div>
-            <div
-              className="absolute top-1/2 left-1/4 w-16 h-16 bg-[#04cf84] rounded-full opacity-10 animate-pulse"
-              style={{ animationDelay: "2s" }}
-            ></div>
-          </div>
+          <div className="absolute inset-0 pointer-events-none overflow-hidden"></div>
 
           {/* Real-time Status Indicator */}
           {currentPod && (
@@ -625,7 +622,35 @@ export default function ShoppingPodPage() {
           {currentPod ? (
             <div className="relative px-4 sm:px-6 lg:px-8 pb-16">
               <div className="max-w-7xl mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Mobile Layout - Cart First */}
+                <div className="block lg:hidden space-y-6">
+                  {/* Shopping Cart - Mobile */}
+                  <div>
+                    <PodCart
+                      podName={currentPod.name}
+                      items={currentPod.items}
+                      totalItems={totalItems}
+                      totalPrice={totalPrice}
+                      onUpdateQuantity={updateItemQuantity}
+                      onRemoveItem={removeItem}
+                      onPaymentClick={() => setShowPaymentModal(true)}
+                    />
+                  </div>
+
+                  {/* Product List - Mobile */}
+                  <div>
+                    <ProductGrid
+                      products={PRODUCTS}
+                      currentPod={currentPod}
+                      onAddItem={addItemToPod}
+                      onUpdateQuantity={updateItemQuantity}
+                      onShowInvite={() => setShowInviteModal(true)}
+                    />
+                  </div>
+                </div>
+
+                {/* Desktop Layout - Original Grid */}
+                <div className="hidden lg:grid lg:grid-cols-3 gap-8">
                   {/* Product List */}
                   <div className="lg:col-span-2">
                     <ProductGrid
