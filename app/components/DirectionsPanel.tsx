@@ -149,7 +149,7 @@ export default function DirectionsPanel({
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+    <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm max-h-[500px] overflow-auto">
       {/* Voice Assistant Controls */}
       <div className="flex items-center gap-4 mb-4">
         <button

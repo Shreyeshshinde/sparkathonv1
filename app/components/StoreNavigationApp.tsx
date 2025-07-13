@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, forwardRef, useImperativeHandle } from "react";
 import ProductSelector from "./ProductSelector";
 import StoreMap from "./StoreMap";
 import DirectionsPanel from "./DirectionsPanel";
@@ -14,7 +14,7 @@ import {
 import { AStar } from "../utils/pathfinding";
 import { PathStep } from "../types/store";
 
-export default function StoreNavigationApp() {
+const StoreNavigationApp = forwardRef(function StoreNavigationApp(_, ref) {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [highlightedAisles, setHighlightedAisles] = useState<string[]>([]);
   const [path, setPath] = useState<PathStep[]>([]);
@@ -112,6 +112,18 @@ export default function StoreNavigationApp() {
     setIsRouteGenerated(true);
   }, []);
 
+  // Expose addProductsToList to parent
+  useImperativeHandle(ref, () => ({
+    addProductsToList: (productIds: string[]) => {
+      setSelectedProducts((prev) => {
+        // Add only products not already in the list
+        const newIds = productIds.filter((id) => !prev.includes(id));
+        return [...prev, ...newIds];
+      });
+    },
+    generateRoute: () => generateRoute(),
+  }));
+
   const estimatedTime = Math.ceil(path.length * 0.5); // Rough estimate
   const totalDistance = path.length;
 
@@ -139,7 +151,7 @@ export default function StoreNavigationApp() {
       </div>
 
       {/* Directions Panel */}
-      <div className="lg:col-span-1">
+      <div className="lg:col-span-1 h-50 overflow-auto">
         <DirectionsPanel
           path={path}
           estimatedTime={estimatedTime}
@@ -148,4 +160,6 @@ export default function StoreNavigationApp() {
       </div>
     </div>
   );
-}
+});
+
+export default StoreNavigationApp;
