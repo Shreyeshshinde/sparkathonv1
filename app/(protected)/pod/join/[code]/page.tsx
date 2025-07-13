@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Users, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import Sidebar from "../../../../components/Sidebar";
 import MobileNav from "../../../../components/MobileNav";
+import Loader from "../../../../components/Loader";
 
 interface PodInfo {
   id: string;
@@ -102,7 +103,7 @@ export default function JoinPodPage() {
         <div className="lg:pl-64">
           <div className="flex items-center justify-center min-h-screen">
             <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-[#04b7cf] mx-auto mb-4" />
+              <Loader className="w-8 h-8 mx-auto mb-4" />
               <p className="text-gray-600">Validating invite code...</p>
             </div>
           </div>
@@ -152,7 +153,7 @@ export default function JoinPodPage() {
               <p className="text-gray-600 mb-6">
                 You've joined {podInfo?.name}. Redirecting...
               </p>
-              <Loader2 className="w-6 h-6 animate-spin text-[#04b7cf] mx-auto" />
+              <Loader className="w-6 h-6 mx-auto" />
             </div>
           </div>
         </div>
@@ -207,8 +208,7 @@ export default function JoinPodPage() {
               >
                 {joining ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Joining...
+                    <Loader size={16} /> Joining...
                   </>
                 ) : (
                   "Join Pod"

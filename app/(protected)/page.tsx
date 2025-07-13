@@ -15,7 +15,7 @@ export default function HomePage() {
       <div className="lg:pl-64">
         <div className="relative">
           {/* Pulsing background blobs */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {/* <div className="absolute inset-0 pointer-events-none overflow-hidden">
             <div className="absolute top-20 left-8 w-32 h-32 bg-[#51c995] rounded-full opacity-10 animate-pulse"></div>
             <div
               className="absolute bottom-32 right-12 w-24 h-24 bg-[#04b7cf] rounded-full opacity-10 animate-pulse"
@@ -25,7 +25,7 @@ export default function HomePage() {
               className="absolute top-1/2 left-1/4 w-16 h-16 bg-[#04cf84] rounded-full opacity-10 animate-pulse"
               style={{ animationDelay: "2s" }}
             ></div>
-          </div>
+          </div> */}
 
           {/* Hero Section */}
           <div className="relative px-4 sm:px-6 lg:px-8 pt-8 lg:pt-16 pb-12">

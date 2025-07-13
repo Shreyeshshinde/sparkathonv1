@@ -5,6 +5,9 @@ import { ShoppingCart, X, ChevronDown, ChevronUp, Users } from "lucide-react";
 import { useUser } from "@clerk/nextjs";
 import Sidebar from "../../components/Sidebar";
 import MobileNav from "../../components/MobileNav";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Loader from "../../components/Loader";
 
 export default function SmartSearchPage() {
   const { user, isLoaded } = useUser();
@@ -19,6 +22,7 @@ export default function SmartSearchPage() {
   const [availablePods, setAvailablePods] = useState<any[]>([]); // Available pods
   const [selectedPod, setSelectedPod] = useState<any>(null); // Selected pod
   const [isSendingToPod, setIsSendingToPod] = useState(false); // Loading state
+  const [isFetchingPods, setIsFetchingPods] = useState(false); // Loading state for fetching pods
   const cartRef = useRef<HTMLDivElement>(null);
 
   // Close cart dropdown when clicking outside
@@ -137,6 +141,7 @@ export default function SmartSearchPage() {
       return;
     }
 
+    setIsFetchingPods(true);
     try {
       const response = await fetch(`/api/pod/user?userId=${user.id}`);
       const data = await response.json();
@@ -150,6 +155,8 @@ export default function SmartSearchPage() {
     } catch (error) {
       console.error("Error fetching pods:", error);
       setAvailablePods([]);
+    } finally {
+      setIsFetchingPods(false);
     }
   };
 
@@ -189,10 +196,12 @@ export default function SmartSearchPage() {
       setShowPodSelection(false);
 
       // Show success message (you can add a toast notification here)
-      alert(`Successfully sent ${cart.length} items to ${selectedPod.name}!`);
+      toast.success(
+        `Successfully sent ${cart.length} items to ${selectedPod.name}!`
+      );
     } catch (error) {
       console.error("Error sending items to pod:", error);
-      alert("Failed to send items to pod. Please try again.");
+      toast.error("Failed to send items to pod. Please try again.");
     } finally {
       setIsSendingToPod(false);
     }
@@ -216,7 +225,7 @@ export default function SmartSearchPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#04cf84] mx-auto mb-4"></div>
+          <Loader className="mx-auto mb-4" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -238,6 +247,16 @@ export default function SmartSearchPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
       <Sidebar />
       <MobileNav />
 
@@ -254,7 +273,7 @@ export default function SmartSearchPage() {
               <div className="relative inline-block mt-4" ref={cartRef}>
                 <button
                   onClick={() => setIsCartOpen(!isCartOpen)}
-                  className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                  className="flex items-center gap-2 bg-[#04b7cf] text-white px-4 py-2 rounded-lg hover:bg-[#04cf84] transition-colors"
                 >
                   <ShoppingCart className="w-5 h-5" />
                   <span>Cart Items ({getCartItemCount()})</span>
@@ -323,15 +342,16 @@ export default function SmartSearchPage() {
                                 ₹{calculateTotalPrice().toFixed(2)}
                               </span>
                             </div>
-                            <button className="w-full mt-3 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors">
+                            {/* <button className="w-full mt-3 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors">
                               Proceed to Checkout
-                            </button>
+                            </button> */}
                             <button
                               onClick={() => {
                                 fetchAvailablePods();
                                 setShowPodSelection(true);
                               }}
-                              className="w-full mt-2 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
+                              className="w-full mt-2 bg-[#04b7cf] text-white py-2 px-4 rounded-lg hover:bg-[#04cf84]
+                               transition-colors flex items-center justify-center gap-2"
                             >
                               <Users className="w-4 h-4" />
                               Send to Shopping Pod
@@ -356,10 +376,16 @@ export default function SmartSearchPage() {
               />
               <button
                 onClick={handleSmartSearch}
-                className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
+                className="bg-[#04b7cf] text-white px-6 py-2 rounded-lg hover:bg-[#04cf84]"
                 disabled={loading}
               >
-                {loading ? "Loading..." : "Get Suggestions"}
+                {loading ? (
+                  <span className="flex items-center gap-2 justify-center">
+                    <Loader size={20} /> Loading...
+                  </span>
+                ) : (
+                  "Get Suggestions"
+                )}
               </button>
               {error && <p className="text-red-500 mt-4">{error}</p>}
             </div>
@@ -399,8 +425,8 @@ export default function SmartSearchPage() {
                   {Object.entries(filteredSuggestions).map(
                     ([type, items]: any) => (
                       <div key={type} className="category-section">
-                        <h3 className="text-xl font-bold text-blue-600 mb-4 capitalize flex items-center gap-2">
-                          <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                        <h3 className="text-xl font-bold text-black mb-4 capitalize flex items-center gap-2">
+                          <span className="w-2 h-2 bg-[#04b7cf] rounded-full"></span>
                           {type}
                         </h3>
 
@@ -472,7 +498,7 @@ export default function SmartSearchPage() {
                                   ) : (
                                     <button
                                       onClick={() => handleAddToCart(item)}
-                                      className="w-full bg-blue-500 text-white text-xs px-3 py-2 rounded-lg hover:bg-blue-600 transition-colors font-medium"
+                                      className="w-full bg-[#04b7cf] text-white text-xs px-3 py-2 rounded-lg hover:bg-[#04cf84] transition-colors font-medium"
                                     >
                                       Add to Cart
                                     </button>
@@ -509,75 +535,93 @@ export default function SmartSearchPage() {
 
       {/* Pod Selection Modal */}
       {showPodSelection && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">
-                Select Shopping Pod
-              </h3>
-              <button
-                onClick={() => setShowPodSelection(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {availablePods.length === 0 ? (
-              <div className="text-center py-6">
-                <Users className="w-12 h-12 mx-auto text-gray-300 mb-2" />
-                <p className="text-gray-500 mb-4">No shopping pods available</p>
-                <p className="text-sm text-gray-400">
-                  Create a shopping pod first to send items
-                </p>
-              </div>
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md mx-auto">
+            <h2 className="text-xl font-semibold mb-4 text-center">
+              Select a Shopping Pod
+            </h2>
+            {/* Loader while fetching pods */}
+            {isFetchingPods ? (
+              <Loader className="my-8" />
             ) : (
               <>
-                <div className="space-y-2 max-h-64 overflow-y-auto">
-                  {availablePods.map((pod) => (
-                    <div
-                      key={pod.id}
-                      onClick={() => setSelectedPod(pod)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-colors ${
-                        selectedPod?.id === pod.id
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h4 className="font-medium text-gray-800">
-                            {pod.name}
-                          </h4>
-                          <p className="text-sm text-gray-500">
-                            {pod.members?.length || 0} members
-                          </p>
-                        </div>
-                        {selectedPod?.id === pod.id && (
-                          <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center">
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-6 flex gap-3">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    Select Shopping Pod
+                  </h3>
                   <button
                     onClick={() => setShowPodSelection(false)}
-                    className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="text-gray-500 hover:text-gray-700"
                   >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={sendToShoppingPod}
-                    disabled={!selectedPod || isSendingToPod}
-                    className="flex-1 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isSendingToPod ? "Sending..." : "Send to Pod"}
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
+
+                {availablePods.length === 0 ? (
+                  <div className="text-center py-6">
+                    <Users className="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                    <p className="text-gray-500 mb-4">
+                      No shopping pods available
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      Create a shopping pod first to send items
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {availablePods.map((pod) => (
+                        <div
+                          key={pod.id}
+                          onClick={() => setSelectedPod(pod)}
+                          className={`p-3 rounded-lg border cursor-pointer transition-colors ${
+                            selectedPod?.id === pod.id
+                              ? "border-[#04b7cf] bg-blue-50"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium text-gray-800">
+                                {pod.name}
+                              </h4>
+                              <p className="text-sm text-gray-500">
+                                {pod.members?.length || 0} members
+                              </p>
+                            </div>
+                            {selectedPod?.id === pod.id && (
+                              <div className="w-4 h-4 bg-[#04b7cf] rounded-full flex items-center justify-center">
+                                <div className="w-2 h-2 bg-white rounded-full"></div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="mt-6 flex gap-3">
+                      <button
+                        onClick={() => setShowPodSelection(false)}
+                        className="flex-1 py-2 px-4 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={sendToShoppingPod}
+                        disabled={!selectedPod || isSendingToPod}
+                        className="flex-1 py-2 px-4 bg-[#04b7cf] text-white rounded-lg hover:bg-[#04cf84] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSendingToPod ? (
+                          <span className="flex items-center gap-2 justify-center">
+                            <Loader size={20} /> Sending...
+                          </span>
+                        ) : (
+                          "Send to Pod"
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
               </>
             )}
           </div>

@@ -14,7 +14,6 @@ const navigation = [
   { name: "Shopping Pod", href: "/pod", icon: Users },
   { name: "Smart Search", href: "/smart-search", icon: Search },
   { name: "Smart Navigator", href: "/smart-navigator", icon: Navigation },
-  { name: "GitHub", href: "/github", icon: Github },
 ];
 
 interface SidebarProps {

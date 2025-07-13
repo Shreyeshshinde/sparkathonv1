@@ -13,8 +13,10 @@ import InviteModal from "../../components/InviteModal";
 import JoinPodModal from "../../components/JoinPodModal";
 import PaymentModal from "../../components/PaymentModal";
 import EmptyState from "../../components/EmptyState";
+import Loader from "../../components/Loader";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import { getRandomizedProducts, ProductItem } from "../../utils/productLoader";
+import { toast } from "react-toastify";
 
 interface PodMember {
   id: string;
@@ -63,6 +65,11 @@ export default function ShoppingPodPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [realtimeStatus, setRealtimeStatus] = useState<string>("disconnected");
   const [currentUserDbId, setCurrentUserDbId] = useState<string | null>(null);
+  const [isPodsLoading, setIsPodsLoading] = useState(false); // Loading state for fetching pods
+  const [isJoining, setIsJoining] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Ref to track if we're in the middle of creating/joining a pod
   const isCreatingOrJoiningRef = useRef(false);
@@ -91,6 +98,7 @@ export default function ShoppingPodPage() {
     async function fetchPods() {
       if (!currentUser) return;
 
+      setIsPodsLoading(true);
       try {
         const res = await fetch(`/api/pod/user?userId=${currentUser.id}`);
         const data = await res.json();
@@ -114,6 +122,8 @@ export default function ShoppingPodPage() {
         }
       } catch (error) {
         console.error("Failed to fetch pods:", error);
+      } finally {
+        setIsPodsLoading(false);
       }
     }
 
@@ -226,7 +236,7 @@ export default function ShoppingPodPage() {
     if (!newPodName.trim() || !currentUser) return;
 
     isCreatingOrJoiningRef.current = true;
-
+    setIsCreating(true);
     try {
       const response = await fetch("/api/pod/create", {
         method: "POST",
@@ -271,6 +281,7 @@ export default function ShoppingPodPage() {
       // Small delay to ensure state updates are processed before allowing pod switching
       setTimeout(() => {
         isCreatingOrJoiningRef.current = false;
+        setIsCreating(false);
       }, 100);
     }
   }, [newPodName, currentUser, isConnected, sendMessage]);
@@ -465,6 +476,25 @@ export default function ShoppingPodPage() {
     [currentPod, isConnected, sendMessage]
   );
 
+  const copyInviteCode = useCallback(
+    async (inviteCode: string) => {
+      navigator.clipboard.writeText(inviteCode);
+      setCopiedInvite(inviteCode);
+      setTimeout(() => setCopiedInvite(null), 2000);
+
+      // Send WebSocket message about invite being shared
+      if (isConnected && currentPod && currentUser) {
+        sendMessage({
+          type: "invite_sent",
+          podId: currentPod.id,
+          inviteCode: inviteCode,
+          sentBy: currentUser.id,
+        });
+      }
+    },
+    [isConnected, currentPod, sendMessage, currentUser]
+  );
+
   const copyInviteLink = useCallback(
     async (inviteCode: string) => {
       const inviteLink = `${window.location.origin}/pod/join/${inviteCode}`;
@@ -489,7 +519,7 @@ export default function ShoppingPodPage() {
     if (!joinPodCode.trim() || !currentUser) return;
 
     isCreatingOrJoiningRef.current = true;
-
+    setIsJoining(true);
     try {
       const response = await fetch("/api/pod/invite", {
         method: "POST",
@@ -538,6 +568,7 @@ export default function ShoppingPodPage() {
       // Small delay to ensure state updates are processed before allowing pod switching
       setTimeout(() => {
         isCreatingOrJoiningRef.current = false;
+        setIsJoining(false);
       }, 100);
     }
   }, [joinPodCode, currentUser, isConnected, sendMessage]);
@@ -550,13 +581,51 @@ export default function ShoppingPodPage() {
       0
     ) || 0;
 
+  const deletePod = async () => {
+    if (!currentPod) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/pod/${currentPod.id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        toast.success("Pod deleted successfully!");
+        // Remove pod from list
+        setPods((prev) => prev.filter((pod) => pod.id !== currentPod.id));
+        setCurrentPod((prev) => {
+          const remaining = pods.filter((pod) => pod.id !== prev?.id);
+          return remaining.length > 0 ? remaining[0] : null;
+        });
+        setShowDeleteModal(false);
+      } else {
+        toast.error("Failed to delete pod.");
+      }
+    } catch (e) {
+      toast.error("Failed to delete pod.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Show loading state while Clerk is loading
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#04cf84] mx-auto mb-4"></div>
+          <Loader className="mx-auto mb-4" />
           <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while pods are being fetched and before currentPod is set
+  if (isLoaded && currentUser && isPodsLoading && !currentPod) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="mx-auto mb-4" />
+          <p className="text-gray-600">Loading your pods...</p>
         </div>
       </div>
     );
@@ -616,6 +685,7 @@ export default function ShoppingPodPage() {
             onPodSelect={setCurrentPod}
             onCreatePod={() => setShowCreatePod(true)}
             onJoinPod={() => setShowJoinModal(true)}
+            onDeletePod={() => setShowDeleteModal(true)}
           />
 
           {/* Content */}
@@ -645,6 +715,7 @@ export default function ShoppingPodPage() {
                       onAddItem={addItemToPod}
                       onUpdateQuantity={updateItemQuantity}
                       onShowInvite={() => setShowInviteModal(true)}
+                      onDeletePod={() => setShowDeleteModal(true)}
                     />
                   </div>
                 </div>
@@ -659,6 +730,7 @@ export default function ShoppingPodPage() {
                       onAddItem={addItemToPod}
                       onUpdateQuantity={updateItemQuantity}
                       onShowInvite={() => setShowInviteModal(true)}
+                      onDeletePod={() => setShowDeleteModal(true)}
                     />
                   </div>
 
@@ -693,6 +765,7 @@ export default function ShoppingPodPage() {
         onPodNameChange={setNewPodName}
         onCreatePod={createPod}
         onClose={() => setShowCreatePod(false)}
+        isCreating={isCreating}
       />
 
       <InviteModal
@@ -700,7 +773,7 @@ export default function ShoppingPodPage() {
         podName={currentPod?.name || ""}
         inviteCode={currentPod?.inviteCode || ""}
         copiedInvite={copiedInvite}
-        onCopyInvite={copyInviteLink}
+        onCopyInvite={copyInviteCode}
         onClose={() => setShowInviteModal(false)}
       />
 
@@ -710,6 +783,7 @@ export default function ShoppingPodPage() {
         onJoinPodCodeChange={setJoinPodCode}
         onJoinPod={joinPod}
         onClose={() => setShowJoinModal(false)}
+        isJoining={isJoining}
       />
 
       <PaymentModal
@@ -725,6 +799,44 @@ export default function ShoppingPodPage() {
           // You can add additional logic here like clearing the cart, etc.
         }}
       />
+
+      {/* Delete Pod Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+              Delete Pod
+            </h3>
+            <p className="mb-6 text-gray-700">
+              Are you sure you want to delete the pod{" "}
+              <span className="font-bold">{currentPod?.name}</span>? This action
+              cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={deletePod}
+                className="flex-1 bg-red-500 text-white py-2 px-4 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader size={18} /> Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

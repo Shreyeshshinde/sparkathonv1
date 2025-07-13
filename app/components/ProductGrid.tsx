@@ -1,4 +1,4 @@
-import { ShoppingCart, Plus, Minus, Share2 } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Share2, Trash2 } from "lucide-react";
 
 interface Product {
   id: string;
@@ -35,6 +35,7 @@ interface ProductGridProps {
   onAddItem: (productId: string) => void;
   onUpdateQuantity: (itemId: string, change: number) => void;
   onShowInvite: () => void;
+  onDeletePod?: () => void;
 }
 
 export default function ProductGrid({
@@ -43,6 +44,7 @@ export default function ProductGrid({
   onAddItem,
   onUpdateQuantity,
   onShowInvite,
+  onDeletePod,
 }: ProductGridProps) {
   // Group products by category
   const productsByCategory = products.reduce((acc, product) => {
@@ -63,13 +65,25 @@ export default function ProductGrid({
             Available Products
           </h2>
         </div>
-        <button
-          onClick={onShowInvite}
-          className="flex items-center gap-2 bg-[#04b7cf] text-white px-3 py-2 rounded-lg hover:bg-[#04cf84] transition-colors text-sm"
-        >
-          <Share2 className="w-4 h-4" />
-          Invite
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={onShowInvite}
+            className="flex items-center gap-2 bg-[#04b7cf] text-white px-3 py-2 rounded-lg hover:bg-[#04cf84] transition-colors text-sm"
+          >
+            <Share2 className="w-4 h-4" />
+            Invite
+          </button>
+          {onDeletePod && (
+            <button
+              onClick={onDeletePod}
+              className="flex items-center gap-2 bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors text-sm"
+              title="Delete this pod"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Products by Category */}
