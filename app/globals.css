@@ -40,6 +40,21 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* Hide scrollbar for horizontal scrolling */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
+
+/* Smooth scrolling for horizontal containers */
+.horizontal-scroll {
+  scroll-behavior: smooth;
+}
 .auth-page {
   @apply flex h-screen w-full flex-col items-center justify-center gap-10;
 }

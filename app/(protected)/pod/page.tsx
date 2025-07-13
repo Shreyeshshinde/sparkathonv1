@@ -164,9 +164,23 @@ export default function ShoppingPodPage() {
       case "item_added":
         if (currentPod && message.podId === currentPod.id) {
           console.log("WebSocket: Adding item with ID:", message.item.id);
+          const existingItemIndex = currentPod.items.findIndex(
+            (item) => item.productId === message.item.productId
+          );
+
+          let updatedItems;
+          if (existingItemIndex !== -1) {
+            // Update existing item
+            updatedItems = [...currentPod.items];
+            updatedItems[existingItemIndex] = message.item;
+          } else {
+            // Add new item
+            updatedItems = [...currentPod.items, message.item];
+          }
+
           const updatedPod = {
             ...currentPod,
-            items: [...currentPod.items, message.item],
+            items: updatedItems,
           };
           setCurrentPod(updatedPod);
           setPods((prev) =>

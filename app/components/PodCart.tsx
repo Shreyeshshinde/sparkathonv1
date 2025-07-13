@@ -68,60 +68,65 @@ export default function PodCart({
         <div className="space-y-4">
           {/* Cart Items */}
           <div className="space-y-3 max-h-64 overflow-y-auto">
-            {items.map((item) => (
-              <div
-                key={item.id}
-                className="p-3 bg-gray-50 rounded-lg border border-gray-200"
-              >
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <h4 className="font-medium text-gray-800 text-sm">
-                      {item.name}
-                    </h4>
-                    <p className="text-[#04b7cf] font-semibold">
-                      ₹{item.price} × {item.quantity}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => onRemoveItem(item.id)}
-                    className="w-6 h-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{item.addedBy.avatar}</span>
-                    <div>
-                      <p className="text-xs text-gray-600">
-                        Added by {item.addedBy.name}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        {formatTimeAgo(item.addedAt)}
+            {items
+              .filter(
+                (item, index, self) =>
+                  index === self.findIndex((t) => t.id === item.id)
+              )
+              .map((item) => (
+                <div
+                  key={item.id}
+                  className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h4 className="font-medium text-gray-800 text-sm">
+                        {item.name}
+                      </h4>
+                      <p className="text-[#04b7cf] font-semibold">
+                        ₹{item.price} × {item.quantity}
                       </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
                     <button
-                      onClick={() => onUpdateQuantity(item.id, -1)}
+                      onClick={() => onRemoveItem(item.id)}
                       className="w-6 h-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors"
                     >
-                      <Minus className="w-3 h-3" />
-                    </button>
-                    <span className="font-semibold text-gray-800 min-w-[1.5rem] text-center text-sm">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => onUpdateQuantity(item.id, 1)}
-                      className="w-6 h-6 rounded-full bg-[#04cf84] text-white hover:bg-[#04b7cf] flex items-center justify-center transition-colors"
-                    >
-                      <Plus className="w-3 h-3" />
+                      <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{item.addedBy.avatar}</span>
+                      <div>
+                        <p className="text-xs text-gray-600">
+                          Added by {item.addedBy.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {formatTimeAgo(item.addedAt)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => onUpdateQuantity(item.id, -1)}
+                        className="w-6 h-6 rounded-full bg-red-100 text-red-600 hover:bg-red-200 flex items-center justify-center transition-colors"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="font-semibold text-gray-800 min-w-[1.5rem] text-center text-sm">
+                        {item.quantity}
+                      </span>
+                      <button
+                        onClick={() => onUpdateQuantity(item.id, 1)}
+                        className="w-6 h-6 rounded-full bg-[#04cf84] text-white hover:bg-[#04b7cf] flex items-center justify-center transition-colors"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
 
           {/* Total */}
