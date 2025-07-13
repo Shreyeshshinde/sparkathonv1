@@ -22,8 +22,8 @@ export default function RootLayout({
         },
       }}
     >
-      <html lang="en">
-        <body className="bg-gray-50">
+      <html lang="en" suppressHydrationWarning>
+        <body className="bg-gray-50" suppressHydrationWarning>
           <NextTopLoader />
           {children}
         </body>

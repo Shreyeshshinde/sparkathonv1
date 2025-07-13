@@ -19,16 +19,59 @@ model User {
   clerkId   String   @unique // This maps to Clerk's user ID
   email     String   @unique
   name      String?
+  avatar    String?
 
-  pods      ShoppingPod[]
+  // Pod memberships
+  podMemberships PodMember[]
+  
+  // Owned pods
+  ownedPods ShoppingPod[] @relation("PodOwner")
+  
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-
-
 model ShoppingPod {
-  id        String   @id @default(cuid())
-  items     Json
-  users     User[]
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  inviteCode  String   @unique
+  ownerId     String
+  owner       User     @relation("PodOwner", fields: [ownerId], references: [id])
+  
+  // Pod members
+  members     PodMember[]
+  
+  // Pod items
+  items       PodItem[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PodMember {
+  id        String      @id @default(cuid())
+  podId     String
+  userId    String
+  isOwner   Boolean     @default(false)
+  joinedAt  DateTime    @default(now())
+  
+  pod       ShoppingPod @relation(fields: [podId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([podId, userId])
+}
+
+model PodItem {
+  id        String      @id @default(cuid())
+  podId     String
+  productId String
+  name      String
+  price     Float
+  quantity  Int         @default(1)
+  addedById String
+  addedAt   DateTime    @default(now())
+  
+  pod       ShoppingPod @relation(fields: [podId], references: [id], onDelete: Cascade)
+  
+  @@unique([podId, productId])
 }
