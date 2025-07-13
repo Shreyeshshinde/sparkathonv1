@@ -84,7 +84,7 @@ export default function PodCart({
                         {item.name}
                       </h4>
                       <p className="text-[#04b7cf] font-semibold">
-                        ₹{item.price} × {item.quantity}
+                        ₹{item.price.toFixed(2)} × {item.quantity}
                       </p>
                     </div>
                     <button
@@ -134,7 +134,7 @@ export default function PodCart({
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-semibold text-gray-800">Total</span>
               <span className="text-2xl font-bold text-[#04b7cf]">
-                ₹{totalPrice}
+                ₹{totalPrice.toFixed(2)}
               </span>
             </div>
 
