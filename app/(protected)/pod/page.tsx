@@ -14,7 +14,7 @@ import JoinPodModal from "../../components/JoinPodModal";
 import PaymentModal from "../../components/PaymentModal";
 import EmptyState from "../../components/EmptyState";
 import Loader from "../../components/Loader";
-import { useWebSocket } from "../../hooks/useWebSocket";
+import { useSocketIO } from "../../hooks/useWebSocket";
 import { getRandomizedProducts, ProductItem } from "../../utils/productLoader";
 import { toast } from "react-toastify";
 
@@ -85,7 +85,7 @@ export default function ShoppingPodPage() {
     : null;
 
   // WebSocket connection - only connect when we have a current pod and user
-  const { isConnected, sendMessage } = useWebSocket({
+  const { isConnected, sendMessage } = useSocketIO({
     podId: currentPod?.id || "",
     userId: currentUser?.id || "",
     onMessage: handleWebSocketMessage,

@@ -8,7 +8,6 @@ const podConnections = new Map();
 console.log("WebSocket server running on ws://localhost:3002");
 
 wss.on("connection", (ws, req) => {
-  // Parse query parameters
   const url = new URL(req.url, "http://localhost");
   const podId = url.searchParams.get("podId");
   const userId = url.searchParams.get("userId");

@@ -97,7 +97,7 @@ export default function PodCart({
 
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg">{item.addedBy.avatar}</span>
+                      <span className="text-lg">👤</span>
                       <div>
                         <p className="text-xs text-gray-600">
                           Added by {item.addedBy.name}
