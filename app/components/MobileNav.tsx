@@ -1,17 +1,26 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Menu, X, Home, Users, Search, Navigation, Github, User } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  Menu,
+  X,
+  Home,
+  Users,
+  Search,
+  Navigation,
+  Github,
+  User,
+} from "lucide-react";
 
 const navigation = [
-  { name: 'Home', href: '/', icon: Home },
-  { name: 'Shopping Pod', href: '/pod', icon: Users },
-  { name: 'Smart Search', href: '/smart-search', icon: Search },
-  { name: 'Smart Navigator', href: '/smart-navigator', icon: Navigation },
-  { name: 'GitHub', href: '/github', icon: Github },
-  { name: 'Profile', href: '/profile', icon: User },
+  { name: "Home", href: "/", icon: Home },
+  { name: "Shopping Pod", href: "/pod", icon: Users },
+  { name: "Smart Search", href: "/smart-search", icon: Search },
+  { name: "Smart Navigator", href: "/smart-navigator", icon: Navigation },
+  // { name: 'GitHub', href: '/github', icon: Github },
+  // { name: 'Profile', href: '/profile', icon: User },
 ];
 
 export default function MobileNav() {
@@ -26,7 +35,9 @@ export default function MobileNav() {
           <div className="w-8 h-8 bg-gradient-to-br from-[#04b7cf] to-[#04cf84] rounded-lg flex items-center justify-center">
             <span className="text-white font-bold text-sm">RV</span>
           </div>
-          <span className="text-xl font-semibold text-gray-900">RetailVerse</span>
+          <span className="text-xl font-semibold text-gray-900">
+            RetailVerse
+          </span>
         </div>
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -49,13 +60,15 @@ export default function MobileNav() {
                   onClick={() => setIsOpen(false)}
                   className={`group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
                     isActive
-                      ? 'bg-[#04cf84]/10 text-[#04cf84]'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? "bg-[#04cf84]/10 text-[#04cf84]"
+                      : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
                   <item.icon
                     className={`mr-3 flex-shrink-0 h-5 w-5 ${
-                      isActive ? 'text-[#04cf84]' : 'text-gray-400 group-hover:text-gray-500'
+                      isActive
+                        ? "text-[#04cf84]"
+                        : "text-gray-400 group-hover:text-gray-500"
                     }`}
                   />
                   {item.name}
