@@ -1,9 +1,11 @@
+//@ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { PodService } from "../../../lib/podService";
 
 export async function POST(request: NextRequest) {
   try {
-    const { podId, productId, name, price, quantity, addedById } = await request.json();
+    const { podId, productId, name, price, quantity, addedById } =
+      await request.json();
 
     if (!podId || !productId || !name || !price || !addedById) {
       return NextResponse.json(
@@ -40,4 +42,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

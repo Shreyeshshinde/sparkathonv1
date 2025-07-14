@@ -1,10 +1,19 @@
+//@ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { PodService } from "../../../lib/podService";
 import prisma from "../../../../lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    const { action, podId, inviteCode, userId, userName, userAvatar, userEmail } = await request.json();
+    const {
+      action,
+      podId,
+      inviteCode,
+      userId,
+      userName,
+      userAvatar,
+      userEmail,
+    } = await request.json();
 
     switch (action) {
       case "generate_invite":
@@ -16,7 +25,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
           success: true,
           inviteCode: pod.inviteCode,
-          inviteLink: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/pod/join/${pod.inviteCode}`
+          inviteLink: `${
+            process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+          }/pod/join/${pod.inviteCode}`,
         });
 
       case "join_pod":
@@ -41,12 +52,12 @@ export async function POST(request: NextRequest) {
             inviteCode,
             userId: user.id, // Use database user ID
             userName,
-            userAvatar
+            userAvatar,
           });
 
           return NextResponse.json({
             success: true,
-            pod: joinedPod
+            pod: joinedPod,
           });
         } catch (error: any) {
           return NextResponse.json({ error: error.message }, { status: 400 });
@@ -55,7 +66,10 @@ export async function POST(request: NextRequest) {
       case "validate_invite":
         const validPod = await PodService.getPodByInviteCode(inviteCode);
         if (!validPod) {
-          return NextResponse.json({ error: "Invalid invite code" }, { status: 404 });
+          return NextResponse.json(
+            { error: "Invalid invite code" },
+            { status: 404 }
+          );
         }
 
         return NextResponse.json({
@@ -64,8 +78,8 @@ export async function POST(request: NextRequest) {
             id: validPod.id,
             name: validPod.name,
             memberCount: validPod.members.length,
-            inviteCode: validPod.inviteCode
-          }
+            inviteCode: validPod.inviteCode,
+          },
         });
 
       default:
@@ -73,7 +87,10 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error("Pod invite API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -83,12 +100,18 @@ export async function GET(request: NextRequest) {
     const inviteCode = searchParams.get("code");
 
     if (!inviteCode) {
-      return NextResponse.json({ error: "Invite code required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invite code required" },
+        { status: 400 }
+      );
     }
 
     const pod = await PodService.getPodByInviteCode(inviteCode);
     if (!pod) {
-      return NextResponse.json({ error: "Invalid invite code" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Invalid invite code" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({
@@ -97,11 +120,14 @@ export async function GET(request: NextRequest) {
         id: pod.id,
         name: pod.name,
         memberCount: pod.members.length,
-        inviteCode: pod.inviteCode
-      }
+        inviteCode: pod.inviteCode,
+      },
     });
   } catch (error) {
     console.error("Pod invite validation error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-} 
+}

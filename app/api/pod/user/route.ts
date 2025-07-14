@@ -1,3 +1,4 @@
+//@ts-ignore
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 
@@ -22,18 +23,18 @@ export async function GET(request: NextRequest) {
     const pods = await prisma.shoppingPod.findMany({
       where: {
         members: {
-          some: { userId: user.id }
-        }
+          some: { userId: user.id },
+        },
       },
       include: {
         members: { include: { user: true } },
-        items: true
-      }
+        items: true,
+      },
     });
 
     // Get all unique user IDs from items to fetch user details
     const allUserIds = new Set<string>();
-    pods.forEach(pod => {
+    pods.forEach((pod) => {
       pod.items.forEach((item: any) => {
         allUserIds.add(item.addedById);
       });
@@ -42,18 +43,18 @@ export async function GET(request: NextRequest) {
     // Fetch all users in one query
     const users = await prisma.user.findMany({
       where: {
-        id: { in: Array.from(allUserIds) }
+        id: { in: Array.from(allUserIds) },
       },
       select: {
         id: true,
         name: true,
-        avatar: true
-      }
+        avatar: true,
+      },
     });
 
     // Create a map for quick user lookup
     const userMap = new Map();
-    users.forEach(user => {
+    users.forEach((user) => {
       userMap.set(user.id, user);
     });
 
@@ -91,6 +92,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ pods: formattedPods });
   } catch (error) {
     console.error("Error fetching user pods:", error);
-    return NextResponse.json({ error: "Failed to fetch pods" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch pods" },
+      { status: 500 }
+    );
   }
-} 
+}

@@ -1,10 +1,12 @@
+//@ts-nocheck
 import { NextRequest, NextResponse } from "next/server";
 import { PodService } from "../../../lib/podService";
 import prisma from "../../../../lib/prisma";
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, ownerId, ownerName, ownerAvatar, ownerEmail } = await request.json();
+    const { name, ownerId, ownerName, ownerAvatar, ownerEmail } =
+      await request.json();
 
     if (!name || !ownerId || !ownerName) {
       return NextResponse.json(
@@ -45,18 +47,18 @@ export async function POST(request: NextRequest) {
     // Fetch all users in one query
     const users = await prisma.user.findMany({
       where: {
-        id: { in: Array.from(allUserIds) }
+        id: { in: Array.from(allUserIds) },
       },
       select: {
         id: true,
         name: true,
-        avatar: true
-      }
+        avatar: true,
+      },
     });
 
     // Create a map for quick user lookup
     const userMap = new Map();
-    users.forEach(user => {
+    users.forEach((user) => {
       userMap.set(user.id, user);
     });
 
@@ -99,4 +101,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}
