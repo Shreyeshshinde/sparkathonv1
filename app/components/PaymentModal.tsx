@@ -12,6 +12,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import QRCodeModal from "./QRCodeModal";
+import Loader from "./Loader";
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -519,8 +520,7 @@ export default function PaymentModal({
           >
             {isProcessing ? (
               <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Processing Payment...
+                <Loader size={20} /> Processing Payment...
               </>
             ) : isSuccess ? (
               <>

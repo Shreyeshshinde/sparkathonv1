@@ -8,6 +8,7 @@ import {
   Link,
 } from "lucide-react";
 import { useState } from "react";
+import PodInviteQRCodeModal from "./PodInviteQRCodeModal";
 
 interface InviteModalProps {
   isOpen: boolean;
@@ -109,28 +110,6 @@ export default function InviteModal({
               <Copy className="w-4 h-4" />
             </button>
           </div>
-        </div>
-
-        {/* QR Code Section */}
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-sm text-gray-600">QR Code:</p>
-            <button
-              onClick={generateQRCode}
-              className="flex items-center gap-2 text-[#04b7cf] hover:text-[#04cf84] transition-colors text-sm"
-            >
-              <QrCode className="w-4 h-4" />
-              {showQR ? "Hide" : "Show"}
-            </button>
-          </div>
-          {showQR && (
-            <div className="bg-gray-100 p-4 rounded-lg text-center">
-              <div className="w-32 h-32 bg-white mx-auto rounded-lg flex items-center justify-center border-2 border-gray-300">
-                <span className="text-gray-500 text-xs">QR Code</span>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">Scan to join the pod</p>
-            </div>
-          )}
         </div>
 
         {/* Share Options */}

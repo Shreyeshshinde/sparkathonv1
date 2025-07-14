@@ -1,4 +1,4 @@
-import { Package } from "lucide-react";
+import { Package, Trash2 } from "lucide-react";
 
 interface Pod {
   id: string;
@@ -16,6 +16,7 @@ interface PodHeaderProps {
   onPodSelect: (pod: Pod) => void;
   onCreatePod: () => void;
   onJoinPod: () => void;
+  onDeletePod?: () => void;
 }
 
 export default function PodHeader({
@@ -24,6 +25,7 @@ export default function PodHeader({
   onPodSelect,
   onCreatePod,
   onJoinPod,
+  onDeletePod,
 }: PodHeaderProps) {
   return (
     <>

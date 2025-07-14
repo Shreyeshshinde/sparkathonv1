@@ -1,9 +1,12 @@
+import Loader from "./Loader";
+
 interface CreatePodModalProps {
   isOpen: boolean;
   podName: string;
   onPodNameChange: (name: string) => void;
   onCreatePod: () => void;
   onClose: () => void;
+  isCreating?: boolean;
 }
 
 export default function CreatePodModal({
@@ -12,6 +15,7 @@ export default function CreatePodModal({
   onPodNameChange,
   onCreatePod,
   onClose,
+  isCreating = false,
 }: CreatePodModalProps) {
   if (!isOpen) return null;
 
@@ -32,14 +36,22 @@ export default function CreatePodModal({
           <button
             onClick={onClose}
             className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+            disabled={isCreating}
           >
             Cancel
           </button>
           <button
             onClick={onCreatePod}
-            className="flex-1 bg-[#04b7cf] text-white py-2 px-4 rounded-lg hover:bg-[#04cf84] transition-colors"
+            className="flex-1 bg-[#04b7cf] text-white py-2 px-4 rounded-lg hover:bg-[#04cf84] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isCreating}
           >
-            Create
+            {isCreating ? (
+              <>
+                <Loader size={18} /> Creating...
+              </>
+            ) : (
+              "Create"
+            )}
           </button>
         </div>
       </div>

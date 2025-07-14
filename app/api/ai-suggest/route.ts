@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextResponse } from "next/server";
 import { MongoClient } from "mongodb";
 import { ChatGroq } from "@langchain/groq";

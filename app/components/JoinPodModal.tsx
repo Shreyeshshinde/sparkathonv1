@@ -1,9 +1,12 @@
+import Loader from "./Loader";
+
 interface JoinPodModalProps {
   isOpen: boolean;
   joinPodCode: string;
   onJoinPodCodeChange: (code: string) => void;
   onJoinPod: () => void;
   onClose: () => void;
+  isJoining?: boolean;
 }
 
 export default function JoinPodModal({
@@ -12,6 +15,7 @@ export default function JoinPodModal({
   onJoinPodCodeChange,
   onJoinPod,
   onClose,
+  isJoining = false,
 }: JoinPodModalProps) {
   if (!isOpen) return null;
 
@@ -30,14 +34,22 @@ export default function JoinPodModal({
           <button
             onClick={onClose}
             className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+            disabled={isJoining}
           >
             Cancel
           </button>
           <button
             onClick={onJoinPod}
-            className="flex-1 bg-[#04b7cf] text-white py-2 px-4 rounded-lg hover:bg-[#04cf84] transition-colors"
+            className="flex-1 bg-[#04b7cf] text-white py-2 px-4 rounded-lg hover:bg-[#04cf84] transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isJoining}
           >
-            Join
+            {isJoining ? (
+              <>
+                <Loader size={18} /> Joining...
+              </>
+            ) : (
+              "Join"
+            )}
           </button>
         </div>
       </div>
