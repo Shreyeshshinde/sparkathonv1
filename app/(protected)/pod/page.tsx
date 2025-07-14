@@ -17,6 +17,7 @@ import Loader from "../../components/Loader";
 import { useSocketIO } from "../../hooks/useWebSocket";
 import { getRandomizedProducts, ProductItem } from "../../utils/productLoader";
 import { toast } from "react-toastify";
+import { useRef as useClickRef } from "react";
 
 interface PodMember {
   id: string;
@@ -73,6 +74,30 @@ export default function ShoppingPodPage() {
 
   // Ref to track if we're in the middle of creating/joining a pod
   const isCreatingOrJoiningRef = useRef(false);
+
+  // Users dropdown state
+  const [showUsersDropdown, setShowUsersDropdown] = useState(false);
+  const usersDropdownRef = useClickRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        usersDropdownRef.current &&
+        !usersDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShowUsersDropdown(false);
+      }
+    }
+    if (showUsersDropdown) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUsersDropdown]);
 
   // Get current user from Clerk
   const currentUser = user
@@ -704,6 +729,13 @@ export default function ShoppingPodPage() {
                       onUpdateQuantity={updateItemQuantity}
                       onRemoveItem={removeItem}
                       onPaymentClick={() => setShowPaymentModal(true)}
+                      members={currentPod.members.map(({ id, name }) => ({
+                        id,
+                        name,
+                      }))}
+                      showUsersDropdown={showUsersDropdown}
+                      setShowUsersDropdown={setShowUsersDropdown}
+                      usersDropdownRef={usersDropdownRef}
                     />
                   </div>
 
@@ -744,6 +776,13 @@ export default function ShoppingPodPage() {
                       onUpdateQuantity={updateItemQuantity}
                       onRemoveItem={removeItem}
                       onPaymentClick={() => setShowPaymentModal(true)}
+                      members={currentPod.members.map(({ id, name }) => ({
+                        id,
+                        name,
+                      }))}
+                      showUsersDropdown={showUsersDropdown}
+                      setShowUsersDropdown={setShowUsersDropdown}
+                      usersDropdownRef={usersDropdownRef}
                     />
                   </div>
                 </div>
