@@ -1,4 +1,13 @@
-import { ShoppingCart, Plus, Minus, Share2, Trash2 } from "lucide-react";
+"use client";
+import {
+  ShoppingCart,
+  Plus,
+  Minus,
+  Share2,
+  Trash2,
+  Loader2,
+} from "lucide-react";
+import { useState } from "react";
 
 interface Product {
   id: string;
@@ -32,7 +41,7 @@ interface ProductGridProps {
     name: string;
     items: PodItem[];
   } | null;
-  onAddItem: (productId: string) => void;
+  onAddItem: (productId: string) => Promise<void>;
   onUpdateQuantity: (itemId: string, change: number) => void;
   onShowInvite: () => void;
   onDeletePod?: () => void;
@@ -46,6 +55,9 @@ export default function ProductGrid({
   onShowInvite,
   onDeletePod,
 }: ProductGridProps) {
+  // Track which product is being added
+  const [loadingItem, setLoadingItem] = useState<string | null>(null);
+
   // Group products by category
   const productsByCategory = products.reduce((acc, product) => {
     const category = product.category || "Other";
@@ -55,6 +67,18 @@ export default function ProductGrid({
     acc[category].push(product);
     return acc;
   }, {} as { [key: string]: Product[] });
+
+  // Handle adding an item
+  const handleAddItem = async (productId: string) => {
+    setLoadingItem(productId);
+    try {
+      await onAddItem(productId);
+    } catch (error) {
+      console.error("Error adding item:", error);
+    } finally {
+      setLoadingItem(null);
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-6">
@@ -170,10 +194,15 @@ export default function ProductGrid({
                             </div>
                           ) : (
                             <button
-                              onClick={() => onAddItem(product.id)}
-                              className="w-full bg-[#04b7cf] text-white text-xs px-3 py-2 rounded-lg hover:bg-[#04cf84] transition-colors font-medium"
+                              onClick={() => handleAddItem(product.id)}
+                              disabled={loadingItem === product.id}
+                              className="w-full bg-[#04b7cf] text-white text-xs px-3 py-2 rounded-lg hover:bg-[#04cf84] transition-colors font-medium flex items-center justify-center"
                             >
-                              Add to Pod
+                              {loadingItem === product.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                "Add to Pod"
+                              )}
                             </button>
                           )}
                         </div>

@@ -6,6 +6,7 @@ import { Users, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import Sidebar from "../../../../components/Sidebar";
 import MobileNav from "../../../../components/MobileNav";
 import Loader from "../../../../components/Loader";
+import { useUser } from "@clerk/nextjs";
 
 interface PodInfo {
   id: string;
@@ -15,6 +16,7 @@ interface PodInfo {
 }
 
 export default function JoinPodPage() {
+  const { user, isLoaded } = useUser();
   const params = useParams();
   const router = useRouter();
   const inviteCode = params.code as string;
@@ -25,16 +27,11 @@ export default function JoinPodPage() {
   const [joining, setJoining] = useState(false);
   const [joined, setJoined] = useState(false);
 
-  // Mock current user
-  const currentUser = {
-    id: "user1",
-    name: "John Doe",
-    avatar: "👤",
-  };
-
   useEffect(() => {
-    validateInviteCode();
-  }, [inviteCode]);
+    if (isLoaded) {
+      validateInviteCode();
+    }
+  }, [inviteCode, isLoaded]);
 
   const validateInviteCode = async () => {
     try {
@@ -59,6 +56,11 @@ export default function JoinPodPage() {
 
   const joinPod = async () => {
     try {
+      if (!user) {
+        setError("User not authenticated.");
+        return;
+      }
+
       setJoining(true);
       setError(null);
 
@@ -70,9 +72,9 @@ export default function JoinPodPage() {
         body: JSON.stringify({
           action: "join_pod",
           inviteCode,
-          userId: currentUser.id,
-          userName: currentUser.name,
-          userAvatar: currentUser.avatar,
+          userId: user.id,
+          userName: `${user.firstName} ${user.lastName || ""}`,
+          userAvatar: user.imageUrl,
         }),
       });
 
@@ -80,7 +82,6 @@ export default function JoinPodPage() {
 
       if (data.success) {
         setJoined(true);
-        // Redirect to the pod after a short delay
         setTimeout(() => {
           router.push("/pod");
         }, 2000);
@@ -94,23 +95,6 @@ export default function JoinPodPage() {
       setJoining(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Sidebar />
-        <MobileNav />
-        <div className="lg:pl-64">
-          <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center">
-              <Loader className="w-8 h-8 mx-auto mb-4" />
-              <p className="text-gray-600">Validating invite code...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (

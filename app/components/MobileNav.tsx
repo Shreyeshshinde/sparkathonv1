@@ -3,24 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Menu,
-  X,
-  Home,
-  Users,
-  Search,
-  Navigation,
-  Github,
-  User,
-} from "lucide-react";
+import { Menu, X, Home, Users, Search, Navigation } from "lucide-react";
+import { UserButton } from "@clerk/nextjs";
 
 const navigation = [
   { name: "Home", href: "/", icon: Home },
   { name: "Shopping Pod", href: "/pod", icon: Users },
   { name: "Smart Search", href: "/smart-search", icon: Search },
   { name: "Smart Navigator", href: "/smart-navigator", icon: Navigation },
-  // { name: 'GitHub', href: '/github', icon: Github },
-  // { name: 'Profile', href: '/profile', icon: User },
 ];
 
 export default function MobileNav() {
@@ -75,6 +65,21 @@ export default function MobileNav() {
                 </Link>
               );
             })}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="flex items-center px-2 py-2 text-sm font-medium text-gray-600">
+                <div className="mr-3 flex-shrink-0 ml-1">
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: "w-6 h-6",
+                        userButtonTrigger: "focus:shadow-none",
+                      },
+                    }}
+                  />
+                </div>
+                <span>Profile</span>
+              </div>
+            </div>
           </nav>
         </div>
       )}
